@@ -1,0 +1,172 @@
+package Ciel_Etoile
+public
+
+  with Software;
+  with Deployment;
+  with ocarina_drivers;
+  with ocarina_buses;
+  with ocarina_drivers_grspw_packet;
+
+
+
+  ---------------
+  -- Processor --
+  ---------------
+  processor the_processor
+  properties
+    Deployment::Execution_Platform => Native;
+  end the_processor;
+
+  processor implementation the_processor.i
+  end the_processor.i;
+
+
+  ---------
+  -- Bus --
+  ---------
+
+  bus Ethernet_Bus
+  properties
+    Deployment::Transport_API => BSD_Sockets;
+  end Ethernet_Bus;
+
+
+ ---------------
+  -- Processes --
+  ---------------
+
+  process A
+  features
+    Out_Port : out event data port Software::Array_type;
+  end A;
+
+  process implementation A.Impl
+  subcomponents
+    Sender        : thread Software::S.Impl;
+  connections
+    port Sender.Data_Source -> Out_Port;
+  end A.Impl;
+
+  process B
+  features
+    In_Port : in event data port Software::Array_type;
+  end B;
+
+  process implementation B.Impl
+  subcomponents
+    Receiver        : thread Software::RS.Impl;
+  connections
+    port In_Port -> Receiver.Data_Sink;
+  end B.Impl;
+
+-- SINGLE PROCESS = LOCAL, CAS NON DISTRIBUE
+
+
+  ------------
+  -- System --
+  ------------
+
+  system ciel_etoile
+  end ciel_etoile;
+
+  system implementation ciel_etoile.Impl
+  subcomponents
+    pr_A : process A.Impl;
+    pr_B : process B.Impl;
+    Device_A : device ocarina_drivers::generic_sockets_ip.pohic
+    {Source_Text => ("devicesconf_native.c");};
+    Device_B : device ocarina_drivers::generic_sockets_ip.pohic
+    {Source_Text => ("devicesconf_native.c");};
+    CPU_A : processor the_processor.i;
+    CPU_B : processor the_processor.i;
+    the_bus : bus ocarina_buses::ip.i;
+  connections
+    bus access the_bus -> Device_A.link;
+    bus access the_bus -> Device_B.link;
+
+    port pr_A.Out_Port -> pr_B.In_Port
+    {Actual_Connection_Binding => (reference (the_bus));};
+
+  properties
+    actual_processor_binding => (reference (CPU_A)) applies to pr_A;
+    actual_processor_binding => (reference (CPU_B)) applies to pr_B;
+    actual_processor_binding => (reference (CPU_A)) applies to Device_A;
+    actual_processor_binding => (reference (CPU_B)) applies to Device_B;
+  end ciel_etoile.Impl;
+
+
+
+
+--voir comment quitter natif (sous forme extendsà pour le processor)
+
+
+-- system implementation ciel_etoile_spw.impl
+    --  Producer/Consummer, refined to LEON/RTEMS POSIX with SpaceWire
+    --  communications using rasta_spacewire.pohic driver, based on
+    --  GRSPW IOCTL driver.
+
+ --  XXXX check why we cannot extend the previous impl
+
+
+--  subcomponents
+--    pr_A : process A.Impl;
+      -- Device fonctionnant avec le bus spacewire star_dundee?
+--    Device_A : device ocarina_drivers::usb_brick_spacewire.pohic
+
+--    {Source_Text => ("devicesconf_spw.c");};
+--    pr_B : process B.Impl;
+      -- Device fonctionnant avec le bus spacewire grspw?
+--    Device_B :  device ocarina_drivers::rasta_spacewire.grspw_pohic
+--    {Source_Text => ("devicesconf_spw.c");};
+--    --CPU_A : processor the_processor.i;
+--    --CPU_B : processor the_processor.i;
+
+--    CPU_A : processor ocarina_processors_x86::x86.linux
+
+--    CPU_B : processor ocarina_processors_leon::leon.rtems_posix;
+
+--    the_bus : bus ocarina_buses::spacewire.generic;
+      --utilisé car link : requires bus access ocarina_buses::spacewire.generic dans les devices
+
+
+--  connections
+--    bus access the_bus -> Device_A.link;
+--    bus access the_bus -> Device_B.link;
+
+--    port pr_A.Out_Port -> pr_B.In_Port
+ -- verifier le bon binding
+--    {Actual_Connection_Binding => (reference (the_bus));};
+
+--  properties
+--    --Deployment::Execution_Platform => LEON_RTEMS_POSIX applies to CPU_B;
+--    --Deployment::Execution_Platform => LEON_RTEMS applies to CPU_B;
+--    -- priotiry range à def?
+--    actual_processor_binding => (reference (CPU_A)) applies to pr_A;
+--    actual_processor_binding => (reference (CPU_B)) applies to pr_B;
+--    actual_processor_binding => (reference (CPU_A)) applies to Device_A;
+--    actual_processor_binding => (reference (CPU_B)) applies to Device_B;
+
+--  end ciel_etoile_spw.impl;
+
+--pas de extends pour changer les devices
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+end Ciel_Etoile;

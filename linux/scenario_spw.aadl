@@ -1,0 +1,30 @@
+package Scenario
+public
+  with Ocarina_Config;
+  with Ocarina_Library;
+
+  system ciel_etoile extends Ocarina_Library::Default_PolyORB_HI_C_Config
+  properties
+    Ocarina_Config::Referencial_Files    =>
+    ("pr_a", "pr_a.ref",
+    "pr_b", "pr_b.ref");
+
+    Ocarina_Config::AADL_Files           +=>
+    ("ciel_etoile.aadl", "software.aadl");
+
+    Ocarina_Config::Root_System_Name => "ciel_etoile_spw.impl";
+
+    --Ocarina_Config::Generator            => polyorb_hi_c;
+    -- Ocarina_Config::Needed_Property_Sets =>
+    --(value (Ocarina_Config::Data_Model),
+    --value (Ocarina_Config::Deployment),
+    --value (Ocarina_Config::ARINC653_Properties),
+    --value (Ocarina_Config::Cheddar_Properties));
+   -- Ocarina_Config::AADL_Version         => AADLv2;
+
+  end ciel_etoile;
+
+  system implementation ciel_etoile.Impl
+  end  ciel_etoile.Impl;
+
+end scenario;
