@@ -70,6 +70,7 @@ void compute_send_position(software__array_type* data_source){
 	}
 
   	printf ("Emetting position-time vector.\n");
+	printf("*data_source[0] %lf, *data_source[1] %lf, *data_source[2] %lf, *data_source[3] %lf\n\n", (*data_source)[0], (*data_source)[1], (*data_source)[2], (*data_source)[3]);
   	printf ("\n");
   	fflush(stdout);
 
@@ -85,8 +86,13 @@ void compute_send_position(software__array_type* data_source){
 void receive_compute_send(software__array_type data_sink){
 
 	//Receiving position-time vector
-	check_time += step;
+
+	printf("data_sink[0] %lf, data_sink[1] %lf, data_sink[2] %lf, data_sink[3] %lf\n\n", data_sink[0], data_sink[1], data_sink[2], data_sink[3]);
+	
 	assert (check_time == data_sink[3]);
+        printf("asserted\n");
+	fflush(stdout);
+check_time += step;
 
 
 /*
@@ -115,7 +121,7 @@ void receive_compute_send(software__array_type data_sink){
     //Prepare the sockaddr_in structure
     memset(&server, 0, sizeof(server));
     server.sin_family = AF_INET;
-    server.sin_addr.s_addr = inet_addr("127.0.0.1");
+    server.sin_addr.s_addr = inet_addr("10.162.1.72");
     //ERREUR HTONL ->HTONS
     server.sin_port = htons(8888);
 
